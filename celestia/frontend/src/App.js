@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Home from './components/Home';
 import Lobby from './components/Lobby';
 import Game from './components/Game';
-import {Results} from './components/Results';
+import { Results } from './components/Results';
 import { 
     auth, 
-    signIn,
-    onAuth, 
+    signIn, // Restored for authentication
+    onAuth, // Restored for authentication
     createGame,
     joinGame,
     getGameStream,
@@ -22,29 +22,28 @@ const LoadingScreen = ({ message = "Loading Sonic Keys..." }) => (
 );
 
 function App() {
-    const  [playerId, setPlayerId] = useState(null);
+    const [playerId, setPlayerId] = useState(null);
     const [gameId, setGameId] = useState(null);
     const [gameState, setGameState] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isTransitioning, setIsTransitioning] = useState(false); // New state for smoother UX
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
-    // Effect for handling player authentication on initial load
-   useEffect(() => {
-    // Use onAuth, which is exported from your firebase.js
-    const unsubscribe = onAuth((user) => {
-        if (user) {
-            setPlayerId(user.uid);
-            setIsLoading(false);
-        } else {
-            // Use signIn, which is also exported from your firebase.js
-            signIn().catch((error) => {
-                console.error("Anonymous sign-in failed:", error);
+    // Effect for handling player authentication on initial load (CORRECTED)
+    useEffect(() => {
+        // This is the correct authentication logic. It gets a unique ID for the player.
+        const unsubscribe = onAuth((user) => {
+            if (user) {
+                setPlayerId(user.uid);
                 setIsLoading(false);
-            });
-        }
-    });
-    return () => unsubscribe();
-}, []);
+            } else {
+                signIn().catch((error) => {
+                    console.error("Anonymous sign-in failed:", error);
+                    setIsLoading(false);
+                });
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Effect for subscribing to real-time game updates from Firestore
     useEffect(() => {
@@ -56,7 +55,6 @@ function App() {
         const unsubscribe = getGameStream(gameId, (gameData) => {
             if (gameData) {
                 setGameState(gameData);
-                // We've received the new game state, so we are no longer transitioning
                 setIsTransitioning(false); 
             } else {
                 console.warn("The game you were in no longer exists.");
@@ -90,7 +88,6 @@ function App() {
             setGameId(idToJoin);
         } catch (error) {
             console.error("Error joining game:", error);
-            // In a real app, you'd set an error state to show in the UI
             setIsTransitioning(false);
         }
     }, [playerId]);
@@ -111,7 +108,6 @@ function App() {
         
         if (gameState.mode === 'race') {
             const finishTime = data.finishTime;
-            // Robustness: Ensure startTime exists before proceeding
             if (!gameState.startTime) {
                 console.error("Cannot calculate score: Game start time is missing.");
                 return;
@@ -134,10 +130,8 @@ function App() {
             const mistakes = data.mistakes;
             const basePoints = 5000;
             finalScore = Math.max(0, basePoints - (mistakes * 100));
-            // Store finish time for endurance too, for consistency and potential tie-breaking
             await updatePlayerScore(gameId, playerId, finalScore, new Date());
         }
-
     }, [gameId, gameState, playerId]);
     
     const handlePlayAgain = () => {
@@ -177,7 +171,6 @@ function App() {
                                 onPlayAgain={handlePlayAgain}
                             />;
                 default:
-                    // Fallback to home if status is unexpected
                     return <Home onCreateGame={handleCreateGame} onJoinGame={handleJoinGame} />;
             }
         }
@@ -194,4 +187,3 @@ function App() {
 }
 
 export default App;
-
