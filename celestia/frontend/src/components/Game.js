@@ -7,37 +7,35 @@ import useEnduranceLogic from '../hooks/useEnduranceLogic';
 const PlayerStatus = ({ name, scoreText, progress, isCurrentUser }) => (
     <div className="mb-4">
         <div className="flex justify-between items-baseline mb-1">
-            <span className={font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}}>{name}</span> {/* CORRECTED */}
+            {/* CORRECTED: Added backticks to className */}
+            <span className={font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}}>{name}</span>
             <span className="text-sm font-['Roboto_Mono'] text-gray-300">{scoreText}</span>
         </div>
         <div className="w-full bg-gray-700 rounded-full h-2.5">
             <motion.div 
                 className="bg-cyan-400 h-2.5 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: ${progress || 0}% }} // CORRECTED
+                // CORRECTED: Added backticks to animate prop
+                animate={{ width: ${progress || 0}% }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
             />
         </div>
     </div>
 );
 
-// The onPlayerFinish prop is now correctly received here.
-const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
+// CORRECTED: The component now correctly accepts the onPlayerFinish prop from App.js
+const Game = ({ gameState, playerId, onPlayerFinish }) => {
   const { mode, paragraph, players } = gameState;
   const hasFinished = useRef(false);
 
-  // Initialize both logic hooks as per React's rules.
-  // We pass the correct onPlayerFinish callback to the hooks.
+  // The logic hooks now receive the correct callback function.
   const race = useRaceLogic(paragraph, () => onPlayerFinish({ finishTime: new Date() }));
   const endurance = useEnduranceLogic(paragraph, (result) => onPlayerFinish({ mistakes: result.mistakes }));
 
-  // State and effect for handling the browser's Speech Synthesis API.
   const [speechSynthesis, setSpeechSynthesis] = useState(null);
   
   useEffect(() => {
     setSpeechSynthesis(window.speechSynthesis);
-
-    // This cleanup function stops any speech if the component is unmounted.
     return () => {
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
@@ -48,13 +46,13 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
   const playAudio = () => {
     if (speechSynthesis && paragraph) {
       const utterance = new SpeechSynthesisUtterance(paragraph);
-      utterance.rate = 0.8; // Speak slightly slower for clarity.
-      speechSynthesis.cancel(); // Stop any currently playing audio.
+      utterance.rate = 0.8;
+      speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
     }
   };
 
-  // This single useEffect is now correctly implemented and matches the props.
+  // CORRECTED: This single useEffect now correctly uses the onPlayerFinish prop.
   useEffect(() => {
     if (hasFinished.current) return;
 
@@ -65,7 +63,7 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
       hasFinished.current = true;
       onPlayerFinish({ mistakes: endurance.mistakes });
     }
-  }, [mode, race.isFinished, endurance.isFinished, endurance.mistakes, onPlayerFinish, hasFinished]);
+  }, [mode, race.isFinished, endurance.isFinished, endurance.mistakes, onPlayerFinish]);
 
   const sortedPlayers = useMemo(() => {
     return Object.entries(players).sort(([, a], [, b]) => {
@@ -74,7 +72,6 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
     });
   }, [players, mode]);
 
-  // --- UI Rendering for RACE Mode ---
   const renderRaceUI = () => (
     <div>
         <div className="font-['Roboto_Mono'] text-lg text-gray-400 p-6 bg-gray-800 rounded-lg mb-4 select-none leading-relaxed">
@@ -86,13 +83,13 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
               return <span key={index} className={colorClass}>{char}</span>
           })}
         </div>
+        {/* Note: The input is present but doesn't need an onChange because the hook uses a global key listener */}
         <input 
             type="text"
+            readOnly
             value={race.typedText}
-            onChange={(e) => race.handleUserInput(e.target.value)}
             className="w-full p-3 text-lg bg-gray-900 border-2 border-gray-700 rounded-md focus:outline-none focus:border-cyan-400"
             autoFocus
-            disabled={race.isFinished}
             placeholder={race.isFinished ? "Finished!" : "Start typing here..."}
         />
         <div className="text-center mt-4 text-3xl font-bold text-cyan-300">
@@ -101,7 +98,6 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
     </div>
   );
   
-  // --- UI Rendering for ENDURANCE Mode ---
   const renderEnduranceUI = () => (
       <div className="flex flex-col h-full justify-between">
           <div>
@@ -127,21 +123,20 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col md:flex-row gap-8">
-        {/* Leaderboard on the left */}
         <aside className="w-full md:w-1/4 glass-card p-6">
             <h2 className="text-2xl text-cyan-300 mb-6">Leaderboard</h2>
             {sortedPlayers.map(([id, player]) => (
                 <PlayerStatus 
                     key={id} 
                     name={player.name}
-                    scoreText={mode === 'race' ? ${Math.floor(player.progress || 0)}% : ${player.score || 0} Mistakes} // CORRECTED
+                    // CORRECTED: Added backticks to scoreText prop
+                    scoreText={mode === 'race' ? ${Math.floor(player.progress || 0)}% : ${player.score || 0} Mistakes}
                     progress={player.progress || 0}
                     isCurrentUser={id === playerId}
                 />
             ))}
         </aside>
 
-        {/* Main game area on the right */}
         <main className="w-full md:w-3/4 glass-card p-6">
           {mode === 'race' ? renderRaceUI() : renderEnduranceUI()}
         </main>
