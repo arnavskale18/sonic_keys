@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="theme-color" content="#0d0d1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>Neon Racer</title>
+    <meta name="description" content="A real-time multiplayer typing game with a neon aesthetic."/>
+    <meta property="og:title" content="Neon Racer" />
+    <meta property="og:description" content="Challenge your friends to a high-speed typing race!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.png" /> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+      body {
+        margin: 0;
+        background-color: #0d0d1a;
+      }
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .loader {
+        width: 60px;
+        height: 10px;
+        background: #00f6ff;
+        border-radius: 5px;
+        box-shadow: 0 0 5px #00f6ff, 0 0 15px #00f6ff, 0 0 25px #00f6ff;
+        animation: pulse-glow 1.5s infinite alternate;
+      }
+      @keyframes pulse-glow {
+        0% {
+          transform: scaleX(1);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scaleX(1.5);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    
+    <div id="root">
+      <div class="loader-container" role="status" aria-label="Loading Neon Racer">
+        <div class="loader"></div>
+      </div>
+    </div>
+    
+  </body>
+</html>
