@@ -1,0 +1,43 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-gray-200 font-sans tracking-wide;
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(138, 43, 226, 0.2) 0%, transparent 30%),
+      radial-gradient(circle at 80% 90%, rgba(0, 255, 255, 0.2) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg;
+  }
+  
+  .neon-button {
+    @apply px-6 py-2 rounded-lg font-bold text-white transition-all duration-300;
+    background: linear-gradient(90deg, theme('colors.brand-purple'), theme('colors.brand-pink'));
+    box-shadow: 0 0 5px theme('colors.brand-pink'), 0 0 10px theme('colors.brand-pink');
+  }
+
+  .neon-button:hover {
+    box-shadow: 0 0 10px theme('colors.brand-cyan'), 0 0 20px theme('colors.brand-cyan');
+    transform: translateY(-2px);
+  }
+
+  .neon-text {
+    @apply text-white animate-glow;
+    text-shadow:
+      0 0 7px theme('colors.brand-cyan'),
+      0 0 10px theme('colors.brand-cyan'),
+      0 0 21px theme('colors.brand-cyan'),
+      0 0 42px theme('colors.brand-purple'),
+      0 0 82px theme('colors.brand-purple');
+  }
+}
