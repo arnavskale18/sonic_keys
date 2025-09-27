@@ -63,7 +63,11 @@ const Lobby = ({ gameState, playerId, onStartGame }) => {
             className="neon-button w-full"
             disabled={players.length < 2}
           >
-            {players.length < 2 ? 'Waiting for players...' : `Start ${gameState.mode.charAt(0).toUpperCase() + gameState.mode.slice(1)} Game`}
+            {
+  players.length < 2 
+    ? 'Waiting for players...' 
+    : `Start ${gameState.mode.charAt(0).toUpperCase() + gameState.mode.slice(1)} Game`
+}
           </motion.button>
         ) : (
           <p className="text-lg text-gray-400 animate-pulse">Waiting for the host to start the game...</p>
