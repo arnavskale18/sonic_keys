@@ -8,7 +8,7 @@ const PlayerStatus = ({ name, scoreText, progress, isCurrentUser }) => (
     <div className="mb-4">
         <div className="flex justify-between items-baseline mb-1">
             {/* CORRECTED: Added backticks to className */}
-            <span className={font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}}>{name}</span>
+            <span className={`font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}`}>{name}</span>
             <span className="text-sm font-['Roboto_Mono'] text-gray-300">{scoreText}</span>
         </div>
         <div className="w-full bg-gray-700 rounded-full h-2.5">
@@ -16,7 +16,7 @@ const PlayerStatus = ({ name, scoreText, progress, isCurrentUser }) => (
                 className="bg-cyan-400 h-2.5 rounded-full"
                 initial={{ width: 0 }}
                 // CORRECTED: Added backticks to animate prop
-                animate={{ width: ${progress || 0}% }}
+                animate={{ width: `${progress || 0}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
             />
         </div>
@@ -130,7 +130,7 @@ const Game = ({ gameState, playerId, onPlayerFinish }) => {
                     key={id} 
                     name={player.name}
                     // CORRECTED: Added backticks to scoreText prop
-                    scoreText={mode === 'race' ? ${Math.floor(player.progress || 0)}% : ${player.score || 0} Mistakes}
+                    scoreText={mode === 'race' ? `${Math.floor(player.progress || 0)}%` : `${player.score || 0} Mistakes`}
                     progress={player.progress || 0}
                     isCurrentUser={id === playerId}
                 />
