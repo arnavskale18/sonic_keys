@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Home from './components/Home';
 import Lobby from './components/Lobby';
 import Game from './components/Game';
-import Results from './components/Results';
+import {Results} from './components/Results';
 import { 
     auth, 
-    signInAnonymously, 
-    onAuthStateChanged,
+    signIn,
+    onAuth, 
     createGame,
     joinGame,
     getGameStream,
@@ -22,27 +22,29 @@ const LoadingScreen = ({ message = "Loading Sonic Keys..." }) => (
 );
 
 function App() {
-    const [playerId, setPlayerId] = useState(null);
+    const  [playerId, setPlayerId] = useState(null);
     const [gameId, setGameId] = useState(null);
     const [gameState, setGameState] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isTransitioning, setIsTransitioning] = useState(false); // New state for smoother UX
 
     // Effect for handling player authentication on initial load
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setPlayerId(user.uid);
+   useEffect(() => {
+    // Use onAuth, which is exported from your firebase.js
+    const unsubscribe = onAuth((user) => {
+        if (user) {
+            setPlayerId(user.uid);
+            setIsLoading(false);
+        } else {
+            // Use signIn, which is also exported from your firebase.js
+            signIn().catch((error) => {
+                console.error("Anonymous sign-in failed:", error);
                 setIsLoading(false);
-            } else {
-                signInAnonymously(auth).catch((error) => {
-                    console.error("Anonymous sign-in failed:", error);
-                    setIsLoading(false);
-                });
-            }
-        });
-        return () => unsubscribe();
-    }, []);
+            });
+        }
+    });
+    return () => unsubscribe();
+}, []);
 
     // Effect for subscribing to real-time game updates from Firestore
     useEffect(() => {
