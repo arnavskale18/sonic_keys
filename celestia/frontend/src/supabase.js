@@ -1,8 +1,8 @@
 // src/supabase.js
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://znfwftivsmdvlpqqotwc.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZndmdGl2c21kdmxwcXFvdHdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMDAxMTUsImV4cCI6MjA3NDU3NjExNX0.6NvzeEYSHIW3b6fek9n1YAD9IcKy2M2t6Wo4IvFeyxE';
+const supabaseUrl = 'YOUR URL';
+const supabaseAnonKey = 'YOUR ANON KEY';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -79,4 +79,5 @@ export const updatePlayerScore = async (playerId, score, finishTime) => {
 
 export const startGame = async (gameId) => {
      await supabase.from('games').update({ status: 'in-progress', start_time: new Date().toISOString() }).eq('id', gameId);
+
 };
