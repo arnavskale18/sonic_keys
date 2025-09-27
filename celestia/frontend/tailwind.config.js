@@ -10,15 +10,17 @@ module.exports = {
         mono: ['Roboto Mono', 'monospace'], // For the typing challenge text - clear and code-like.
       },
       // The core color palette for the Neon Racer vibe.
-      colors: {
-        'dark-purple': '#0d0d1a',   // The deep space background color.
-        'light-purple': '#1a1a3d', // A slightly lighter shade for card backgrounds.
-        'neon-cyan': '#00f6ff',     // The primary, vibrant action color.
-        'neon-magenta': '#ff00ff', // A secondary accent color for highlights.
-        'custom-gray': '#a0a0c0',   // For secondary text, designed to be soft on a dark background.
-        'success': '#00ff6a',       // A glowing green for correct entries and success states.
-        'error': '#ff4d4d',         // A clear, neon red for mistakes and error states.
-      },
+      
+    colors: {
+        'dark-bg': '#0d1117',        // Renamed to match your index.css
+        'brand-purple': '#8A2BE2',   // Added from your index.css
+        'brand-pink': '#FF00FF',     // Added from your index.css
+        'brand-cyan': '#00F6FF',     // Added from your index.css
+        'light-purple': '#1a1a3d',
+        'custom-gray': '#a0a0c0',
+        'success': '#00ff6a',
+        'error': '#ff4d4d',
+    },
       // Custom shadow effects are crucial for the "glow" UX.
       boxShadow: {
         'neon-glow': '0 0 5px theme("colors.neon-cyan"), 0 0 20px theme("colors.neon-cyan / 70%"), 0 0 30px theme("colors.neon-cyan / 40%")',
