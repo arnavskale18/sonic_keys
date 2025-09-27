@@ -26,9 +26,9 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // --- AUTHENTICATION ---
-// These are now exported directly for cleaner use in App.js
-// export const signIn = () => signInAnonymously(auth);
-// export const onAuth = (callback) => onAuthStateChanged(auth, callback);
+// These are the missing functions that App.js needs.
+export const signIn = () => signInAnonymously(auth);
+export const onAuth = (callback) => onAuthStateChanged(auth, callback);
 
 // --- FIRESTORE FUNCTIONS ---
 
@@ -83,7 +83,7 @@ export const joinGame = async (gameId, playerId, playerName) => {
     throw new Error("Game has already started!");
   }
 
-  // CORRECTED: Use backticks for template literals and dot notation for the path.
+  // CORRECTED: Uses backticks for the template literal.
   const playerPath = `players.${playerId}`;
   await updateDoc(gameRef, {
     [playerPath]: {
@@ -95,7 +95,7 @@ export const joinGame = async (gameId, playerId, playerName) => {
 };
 
 /**
- * Starts the game, setting its status to 'in-progress' and recording the server start time.
+ * Starts the game, setting its status to 'in-progress'.
  */
 export const startGame = async (gameId) => {
   const gameRef = doc(db, 'games', gameId);
@@ -106,20 +106,19 @@ export const startGame = async (gameId) => {
 };
 
 /**
- * Updates a player's score and finish time in Firestore.
+ * CORRECTED: Updates a player's score and finish time in Firestore.
+ * The name and parameters now match what App.js is calling.
  */
 export const updatePlayerScore = async (gameId, playerId, score, finishTime) => {
-  const gameRef = doc(db, 'games', gameId);
-  // CORRECTED: Use backticks for template literals and dot notation for paths.
-  const scorePath = `players.${playerId}.score`;
-  const finishTimePath = `players.${playerId}.finishTime`;
-
-  await updateDoc(gameRef, {
-      [scorePath]: score,
-      // CORRECTED: Store the actual Date object. Firestore will convert it to a Timestamp,
-      // which is consistent with how startTime is stored.
-      [finishTimePath]: finishTime 
-  });
+    const gameRef = doc(db, 'games', gameId);
+    // CORRECTED: Uses backticks for the template literals.
+    const scorePath = `players.${playerId}.score`;
+    const finishTimePath = `players.${playerId}.finishTime`;
+    
+    await updateDoc(gameRef, {
+        [scorePath]: score,
+        [finishTimePath]: finishTime.getTime()
+    });
 };
 
 /**
@@ -127,13 +126,7 @@ export const updatePlayerScore = async (gameId, playerId, score, finishTime) => 
  */
 export const getGameStream = (gameId, callback) => {
   const gameRef = doc(db, 'games', gameId);
-  // Returns the unsubscribe function to the caller (App.js) for cleanup.
   return onSnapshot(gameRef, (doc) => {
-    if (doc.exists()) {
-        callback(doc.data());
-    } else {
-        callback(null); // Explicitly handle the case where the doc is deleted.
-    }
+    callback(doc.data());
   });
 };
-
