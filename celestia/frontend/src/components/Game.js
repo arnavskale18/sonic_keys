@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import useRaceLogic from '../hooks/useRaceLogic';
 import useEnduranceLogic from '../hooks/useEnduranceLogic';
@@ -7,30 +7,30 @@ import useEnduranceLogic from '../hooks/useEnduranceLogic';
 const PlayerStatus = ({ name, scoreText, progress, isCurrentUser }) => (
     <div className="mb-4">
         <div className="flex justify-between items-baseline mb-1">
-            <span className={`font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}`}>{name}</span>
+            <span className={font-bold truncate ${isCurrentUser ? 'text-cyan-300' : 'text-white'}}>{name}</span> {/* CORRECTED */}
             <span className="text-sm font-['Roboto_Mono'] text-gray-300">{scoreText}</span>
         </div>
-        <div className="progress-bar-container">
+        <div className="w-full bg-gray-700 rounded-full h-2.5">
             <motion.div 
-                className="progress-bar"
+                className="bg-cyan-400 h-2.5 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${progress || 0}%` }}
+                animate={{ width: ${progress || 0}% }} // CORRECTED
                 transition={{ duration: 0.5, ease: "easeInOut" }}
             />
         </div>
     </div>
 );
 
-const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => {
+// The onPlayerFinish prop is now correctly received here.
+const Game = ({ gameState, playerId, onPlayerFinish }) => { // CORRECTED
   const { mode, paragraph, players } = gameState;
-
-  // This ref ensures the onFinishRace callback is only ever called once.
   const hasFinished = useRef(false);
 
   // Initialize both logic hooks as per React's rules.
-  const race = useRaceLogic(paragraph);
-  const endurance = useEnduranceLogic(paragraph);
-  
+  // We pass the correct onPlayerFinish callback to the hooks.
+  const race = useRaceLogic(paragraph, () => onPlayerFinish({ finishTime: new Date() }));
+  const endurance = useEnduranceLogic(paragraph, (result) => onPlayerFinish({ mistakes: result.mistakes }));
+
   // State and effect for handling the browser's Speech Synthesis API.
   const [speechSynthesis, setSpeechSynthesis] = useState(null);
   
@@ -54,27 +54,23 @@ const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => 
     }
   };
 
-  // Effect to report when the race is finished.
+  // This single useEffect is now correctly implemented and matches the props.
   useEffect(() => {
-    if (mode === 'race' && race.isFinished && !hasFinished.current) {
-      hasFinished.current = true; // Set flag to prevent duplicates.
-      onFinishRace();
-    }
-  }, [mode, race.isFinished, onFinishRace]);
+    if (hasFinished.current) return;
 
-  // Effect to report the score in real-time for endurance mode.
-  useEffect(() => {
-    if (mode === 'endurance') {
-      onUpdateEnduranceScore(endurance.mistakes);
+    if (mode === 'race' && race.isFinished) {
+      hasFinished.current = true;
+      onPlayerFinish({ finishTime: new Date() });
+    } else if (mode === 'endurance' && endurance.isFinished) {
+      hasFinished.current = true;
+      onPlayerFinish({ mistakes: endurance.mistakes });
     }
-  }, [mode, endurance.mistakes, onUpdateEnduranceScore]);
+  }, [mode, race.isFinished, endurance.isFinished, endurance.mistakes, onPlayerFinish, hasFinished]);
 
-  // Memoize the sorted player list to optimize performance.
   const sortedPlayers = useMemo(() => {
     return Object.entries(players).sort(([, a], [, b]) => {
-        // Sort by progress in race mode, or by lowest mistakes in endurance mode.
-        if (mode === 'race') return (b.progress || 0) - (a.progress || 0);
-        return (a.score || 0) - (b.score || 0);
+      if (mode === 'race') return (b.progress || 0) - (a.progress || 0);
+      return (a.score || 0) - (b.score || 0);
     });
   }, [players, mode]);
 
@@ -94,12 +90,12 @@ const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => 
             type="text"
             value={race.typedText}
             onChange={(e) => race.handleUserInput(e.target.value)}
-            className="w-full"
+            className="w-full p-3 text-lg bg-gray-900 border-2 border-gray-700 rounded-md focus:outline-none focus:border-cyan-400"
             autoFocus
             disabled={race.isFinished}
             placeholder={race.isFinished ? "Finished!" : "Start typing here..."}
         />
-        <div className="text-center mt-4 text-3xl font-bold neon-text">
+        <div className="text-center mt-4 text-3xl font-bold text-cyan-300">
             WPM: {race.wpm}
         </div>
     </div>
@@ -109,22 +105,22 @@ const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => 
   const renderEnduranceUI = () => (
       <div className="flex flex-col h-full justify-between">
           <div>
-            <h2 className="text-2xl text-center mb-4 text-purple-300">Audio Endurance Challenge</h2>
-            <p className="text-center text-gray-400 mb-6">Listen to the audio and type what you hear. Every mistake counts.</p>
-            <div className="text-center mb-6">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={playAudio} className="neon-button">
-                    Play Audio
-                </motion.button>
-            </div>
+              <h2 className="text-2xl text-center mb-4 text-purple-300">Audio Endurance Challenge</h2>
+              <p className="text-center text-gray-400 mb-6">Listen to the audio and type what you hear. Every mistake counts.</p>
+              <div className="text-center mb-6">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={playAudio} className="neon-button">
+                      Play Audio
+                  </motion.button>
+              </div>
           </div>
           <div className="flex-grow flex flex-col justify-center">
-            <p className="text-center font-['Roboto_Mono'] text-2xl text-gray-300 h-10 p-2 bg-gray-800 rounded">
-                {endurance.typedText}
-                <span className="animate-ping text-cyan-300">|</span>
-            </p>
-            <div className="text-center mt-4 text-3xl font-bold text-red-500">
-                Mistakes: {endurance.mistakes}
-            </div>
+              <p className="text-center font-['Roboto_Mono'] text-2xl text-gray-300 h-10 p-2 bg-gray-800 rounded">
+                  {endurance.typedText}
+                  <span className="animate-ping text-cyan-300">|</span>
+              </p>
+              <div className="text-center mt-4 text-3xl font-bold text-red-500">
+                  Mistakes: {endurance.mistakes}
+              </div>
           </div>
       </div>
   );
@@ -132,14 +128,13 @@ const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col md:flex-row gap-8">
         {/* Leaderboard on the left */}
-        <aside className="w-full md:w-1/4 glass-card">
-            <h2 className="text-2xl neon-text mb-6">Leaderboard</h2>
+        <aside className="w-full md:w-1/4 glass-card p-6">
+            <h2 className="text-2xl text-cyan-300 mb-6">Leaderboard</h2>
             {sortedPlayers.map(([id, player]) => (
                 <PlayerStatus 
                     key={id} 
                     name={player.name}
-                    // Display the most relevant real-time metric for each mode.
-                    scoreText={mode === 'race' ? `${Math.floor(player.progress || 0)}%` : `${player.score || 0} Mistakes`}
+                    scoreText={mode === 'race' ? ${Math.floor(player.progress || 0)}% : ${player.score || 0} Mistakes} // CORRECTED
                     progress={player.progress || 0}
                     isCurrentUser={id === playerId}
                 />
@@ -147,7 +142,7 @@ const Game = ({ gameState, playerId, onFinishRace, onUpdateEnduranceScore }) => 
         </aside>
 
         {/* Main game area on the right */}
-        <main className="w-full md:w-3/4 glass-card">
+        <main className="w-full md:w-3/4 glass-card p-6">
           {mode === 'race' ? renderRaceUI() : renderEnduranceUI()}
         </main>
     </div>
