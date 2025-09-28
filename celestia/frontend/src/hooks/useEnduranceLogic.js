@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) => {
     const [typedText, setTypedText] = useState('');
-    const [score, setScore] = useState(0); // Changed from 'mistakes' to 'score'
+    const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
 
     const handleKeyDown = useCallback((event) => {
@@ -14,19 +14,22 @@ const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) =
         const expectedChar = paragraphText[currentPosition];
 
         if (key === 'Backspace' || key.length > 1) {
-            return; // Ignore backspace and other special keys
+            return;
         }
 
         if (expectedChar && key.toLowerCase() === expectedChar.toLowerCase()) {
             const newTypedText = typedText + expectedChar;
-            const newScore = newTypedText.length; // Score is number of correct characters
+            const newScore = newTypedText.length;
+            
+            // --- FIX: Calculate progress percentage ---
+            const newProgress = Math.floor((newTypedText.length / paragraphText.length) * 100);
             
             setTypedText(newTypedText);
             setScore(newScore);
             
-            // Send live score update
+            // Send both score and progress update
             if (onPlayerProgress) {
-                onPlayerProgress({ score: newScore });
+                onPlayerProgress({ score: newScore, progress: newProgress });
             }
 
             if (newTypedText.length === paragraphText.length) {
@@ -34,7 +37,6 @@ const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) =
                 onFinish({ score: newScore });
             }
         }
-        // If the key is wrong, we do nothing. The player is stuck.
     }, [enabled, typedText, isFinished, paragraphText, onFinish, onPlayerProgress]);
 
     useEffect(() => {
@@ -43,7 +45,7 @@ const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) =
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [enabled, handleKeyDown]);
 
-    return { typedText, score, isFinished }; // Return 'score' instead of 'mistakes'
+    return { typedText, score, isFinished };
 };
 
 export default useEnduranceLogic;
