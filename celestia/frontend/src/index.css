@@ -5,6 +5,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* In src/index.css or similar */
+/* src/index.css */
+
+/* ... other CSS rules ... */
+
+
+
+/* ... other CSS rules ... */
+
 @layer base {
   body {
     @apply bg-dark-bg text-gray-200 font-sans tracking-wide;
