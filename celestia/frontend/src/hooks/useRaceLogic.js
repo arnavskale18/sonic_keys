@@ -13,29 +13,25 @@ const useRaceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) => {
         if (!startTime || typedText.length === 0) return 0;
         const minutes = (new Date().getTime() - startTime.getTime()) / 60000;
         if (minutes === 0) return 0;
-        
-        // --- FIX: WPM is now based on correct characters only ---
         const correctChars = typedText.length - errors.size;
-        const words = (correctChars / 5); // 5 chars per word on average
-        
+        const words = (correctChars / 5);
         return Math.max(0, Math.round(words / minutes));
-    }, [startTime, typedText, errors]); // Dependency array updated
+    }, [startTime, typedText, errors]);
 
     const handleKeyDown = useCallback((event) => {
+        event.preventDefault(); // --- THIS IS THE FIX ---
         if (!enabled || isFinished || !paragraphText) return;
 
         const { key } = event;
         if (!startTime) setStartTime(new Date());
 
         if (key === 'Backspace') {
-            // --- FIX: Backspace now correctly removes errors ---
             const newErrors = new Set(errors);
             if (newErrors.has(typedText.length - 1)) {
                 newErrors.delete(typedText.length - 1);
                 setErrors(newErrors);
             }
             setTypedText(current => current.slice(0, -1));
-
         } else if (key.length === 1) {
             const newTypedText = typedText + key;
             setTypedText(newTypedText);
@@ -43,11 +39,10 @@ const useRaceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) => {
                 setErrors(current => new Set(current).add(newTypedText.length - 1));
             }
         }
-    }, [enabled, typedText, isFinished, paragraphText, startTime, errors]); // Dependency array updated
+    }, [enabled, typedText, isFinished, paragraphText, startTime, errors]);
 
     useEffect(() => {
         if (!enabled || isFinished) return;
-
         if (!paragraphText || !startTime) return;
         const currentProgress = Math.floor((typedText.length / paragraphText.length) * 100);
         const currentWpm = calculateWPM();
