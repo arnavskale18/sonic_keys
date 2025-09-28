@@ -90,6 +90,7 @@ const Game = ({ gameState, playerId, onPlayerFinish, onPlayerProgress }) => {
                          </p>
                      </div>
                 ) : (
+                    // --- INCORPORATED FRIEND'S CHANGES FOR ENDURANCE MODE DISPLAY ---
                     <div className="flex flex-col h-full">
                         <div className="text-center">
                             <h2 className="text-2xl mb-4 text-indigo-400">Audio Endurance</h2>
@@ -100,13 +101,14 @@ const Game = ({ gameState, playerId, onPlayerFinish, onPlayerProgress }) => {
                                 </button>
                             </div>
                         </div>
-                        {/* --- FIX: Restructured this section to prevent overlap --- */}
+                        {/* The order of Points and Typed Text has been swapped, and the cursor space fixed */}
                         <div className="flex-grow flex flex-col justify-center space-y-4">
-                            <p className="font-mono text-2xl text-gray-300 h-10 p-2 bg-gray-900/50 rounded text-center">
-                                {endurance.typedText} <span className="animate-ping text-cyan-300">|</span>
-                            </p>
                             <p className="text-center text-3xl font-bold text-green-400">
                                 Points: {endurance.score}
+                            </p>
+                            <p className="font-mono text-2xl text-gray-300 h-10 p-2 bg-gray-900/50 rounded text-center">
+                                {/* FIX: Removed the extra space before the cursor */}
+                                {endurance.typedText}<span className="animate-ping text-cyan-300">|</span> 
                             </p>
                         </div>
                     </div>
