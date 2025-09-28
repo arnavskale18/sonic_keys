@@ -94,3 +94,43 @@ export const finishGame = async (gameId) => {
         .update({ status: 'finished' })
         .eq('id', gameId);
 };
+// src/supabase.js
+
+// ... (your existing imports and functions like createGame, joinGame, etc.) ...
+
+// --- SOLO MODE FUNCTIONS ---
+
+// Function to save a player's successful solo run time
+export async function saveSoloScore(playerName, totalTimeMs) {
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    
+    const { data, error } = await supabase
+        .from('solo_runs')
+        .insert([
+            { player_name: playerName, total_time_ms: totalTimeMs }
+        ]);
+
+    if (error) {
+        console.error("Supabase error saving solo score:", error);
+        throw new Error("Failed to save score to the global records.");
+    }
+    return data;
+}
+
+// Function to fetch the top 20 fastest scores
+export async function getLeaderboard() {
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+
+    // Fetch the top 20, ordered by total_time_ms (ascending, meaning fastest time first)
+    const { data, error } = await supabase
+        .from('solo_runs')
+        .select(`player_name, total_time_ms`)
+        .order('total_time_ms', { ascending: true })
+        .limit(20);
+
+    if (error) {
+        console.error("Supabase error fetching leaderboard:", error);
+        throw new Error("Failed to retrieve leaderboard data.");
+    }
+    return data;
+}
