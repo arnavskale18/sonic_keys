@@ -7,6 +7,7 @@ const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) =
     const [isFinished, setIsFinished] = useState(false);
 
     const handleKeyDown = useCallback((event) => {
+        event.preventDefault(); // --- THIS IS THE FIX ---
         if (!enabled || isFinished || !paragraphText) return;
 
         const { key } = event;
@@ -20,14 +21,11 @@ const useEnduranceLogic = (paragraphText, onFinish, onPlayerProgress, enabled) =
         if (expectedChar && key.toLowerCase() === expectedChar.toLowerCase()) {
             const newTypedText = typedText + expectedChar;
             const newScore = newTypedText.length;
-            
-            // --- FIX: Calculate progress percentage ---
             const newProgress = Math.floor((newTypedText.length / paragraphText.length) * 100);
             
             setTypedText(newTypedText);
             setScore(newScore);
             
-            // Send both score and progress update
             if (onPlayerProgress) {
                 onPlayerProgress({ score: newScore, progress: newProgress });
             }
