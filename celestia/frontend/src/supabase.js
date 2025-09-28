@@ -77,7 +77,20 @@ export const updatePlayerScore = async (playerId, score, finishTime) => {
     await supabase.from('players').update(updateData).eq('id', playerId);
 };
 
+export const updatePlayerProgress = async (playerId, progress, score) => {
+    await supabase
+        .from('players')
+        .update({ progress: progress, score: score })
+        .eq('id', playerId);
+};
+
 export const startGame = async (gameId) => {
      await supabase.from('games').update({ status: 'in-progress', start_time: new Date().toISOString() }).eq('id', gameId);
+};
 
+export const finishGame = async (gameId) => {
+    await supabase
+        .from('games')
+        .update({ status: 'finished' })
+        .eq('id', gameId);
 };
