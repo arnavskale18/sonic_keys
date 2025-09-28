@@ -4,10 +4,8 @@ import Home from './components/Home';
 import Lobby from './components/Lobby';
 import Game from './components/Game';
 import { Results } from './components/Results';
-// 👇 ADDED IMPORTS 👇
 import LetterGlitch from './components/LetterGlitch';
 import TargetCursor from './components/TargetCursor'; 
-// 👆 END ADDED IMPORTS 👆
 import { 
     createGame, 
     joinGame, 
@@ -94,22 +92,18 @@ function App() {
     };
 
     return (
-        // 👇 MODIFIED RETURN BLOCK 👇
         <div className="min-h-screen text-gray-200 font-sans">
             
-            {/* 1. BACKGROUND EFFECT */}
+            {/* --- FIX: Render LetterGlitch unconditionally for a persistent background --- */}
             <LetterGlitch /> 
-
-            {/* 2. CUSTOM CURSOR */}
+            
             <TargetCursor 
               targetSelector=".cursor-target" 
               hideDefaultCursor={true}
             />
             
-            {/* 3. APPLICATION CONTENT */}
             <div className="relative z-10">{renderContent()}</div>
         </div>
-        // 👆 END MODIFIED RETURN BLOCK 👆
     );
 }
 
