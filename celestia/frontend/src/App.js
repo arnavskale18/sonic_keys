@@ -4,7 +4,19 @@ import Home from './components/Home';
 import Lobby from './components/Lobby';
 import Game from './components/Game';
 import { Results } from './components/Results';
-import { createGame, joinGame, getGameStream, startGame, updatePlayerScore } from './supabase';
+// 👇 ADDED IMPORTS 👇
+import LetterGlitch from './components/LetterGlitch';
+import TargetCursor from './components/TargetCursor'; 
+// 👆 END ADDED IMPORTS 👆
+import { 
+    createGame, 
+    joinGame, 
+    getGameStream, 
+    startGame, 
+    updatePlayerScore,
+    updatePlayerProgress,
+    finishGame 
+} from './supabase';
 
 const LoadingScreen = ({ message }) => (
     <div className="flex items-center justify-center h-screen bg-[#0d1117]">
@@ -33,11 +45,7 @@ function App() {
             const { gameId: newGameId, playerId: newPlayerId } = await createGame(mode, playerName);
             setGameId(newGameId);
             setPlayerId(newPlayerId);
-        } catch (error) {
-            console.error("Error creating game:", error);
-            alert(error.message);
-            setIsLoading(false);
-        }
+        } catch (error) { console.error("Error creating game:", error); alert(error.message); setIsLoading(false); }
     };
 
     const handleJoinGame = async (code, playerName) => {
@@ -46,19 +54,24 @@ function App() {
             const { gameId: existingGameId, playerId: newPlayerId } = await joinGame(code, playerName);
             setGameId(existingGameId);
             setPlayerId(newPlayerId);
-        } catch (error) {
-            console.error("Error joining game:", error);
-            alert(error.message);
-            setIsLoading(false);
+        } catch (error) { console.error("Error joining game:", error); alert(error.message); setIsLoading(false); }
+    };
+
+    const handlePlayerProgress = async ({ progress, wpm, score }) => {
+        if (playerId) {
+            const currentScore = (gameState?.mode === 'race' ? wpm : score) ?? 0;
+            await updatePlayerProgress(playerId, progress, currentScore);
         }
     };
 
     const handleStartGame = () => { startGame(gameId); };
-    const handlePlayerFinish = async ({ score, finishTime }) => { await updatePlayerScore(playerId, score, finishTime); };
-    const handlePlayAgain = () => {
-        setGameId(null);
-        setGameState(null);
+
+    const handlePlayerFinish = async ({ score, finishTime }) => { 
+        await updatePlayerScore(playerId, score, finishTime);
+        await finishGame(gameId);
     };
+
+    const handlePlayAgain = () => { setGameId(null); setGameState(null); };
 
     if (isLoading && !gameState) {
         return <LoadingScreen message="Connecting to the grid..." />;
@@ -70,7 +83,7 @@ function App() {
                 case 'waiting':
                     return <Lobby gameState={gameState} playerId={playerId} onStartGame={handleStartGame} />;
                 case 'in-progress':
-                    return <Game gameState={gameState} playerId={playerId} onPlayerFinish={handlePlayerFinish} />;
+                    return <Game gameState={gameState} playerId={playerId} onPlayerFinish={handlePlayerFinish} onPlayerProgress={handlePlayerProgress} />;
                 case 'finished':
                      return <Results gameState={gameState} onPlayAgain={handlePlayAgain} />;
                 default:
@@ -81,9 +94,22 @@ function App() {
     };
 
     return (
-        <div className="bg-[#0d1117] min-h-screen text-gray-200 font-sans">
+        // 👇 MODIFIED RETURN BLOCK 👇
+        <div className="min-h-screen text-gray-200 font-sans">
+            
+            {/* 1. BACKGROUND EFFECT */}
+            <LetterGlitch /> 
+
+            {/* 2. CUSTOM CURSOR */}
+            <TargetCursor 
+              targetSelector=".cursor-target" 
+              hideDefaultCursor={true}
+            />
+            
+            {/* 3. APPLICATION CONTENT */}
             <div className="relative z-10">{renderContent()}</div>
         </div>
+        // 👆 END MODIFIED RETURN BLOCK 👆
     );
 }
 
